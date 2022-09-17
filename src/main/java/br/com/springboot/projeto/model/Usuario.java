@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
+import javax.validation.constraints.NotBlank;
 
 @Entity //se tornando uma entidade no banco
 @SequenceGenerator(name = "seq_usuario", sequenceName = "seq_usuario", allocationSize = 1, initialValue = 1) //gerador de sequencia, de 1 em 1 e iniciando em 1
@@ -19,6 +20,7 @@ public class Usuario implements Serializable{
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_usuario") //gerador de sequencia
 	private Long id;
 	
+	@NotBlank
 	private String nome;
 	private int idade;
 	

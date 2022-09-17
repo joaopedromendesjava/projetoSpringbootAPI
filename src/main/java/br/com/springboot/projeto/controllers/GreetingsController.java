@@ -60,19 +60,23 @@ public class GreetingsController {
     			
     }
     
-    @PostMapping(value = "salvar") //mapeamento de salvar
+    @PostMapping(value = "salvar") //mapeamento de salvar //ENDPOINT
     @ResponseBody //retorna descrição da resposta
-    public ResponseEntity<Usuario> salvar(@RequestBody Usuario usuario){ //recebe os dados para salvar, injeta na classe usuario
+    public ResponseEntity<?> salvar(@RequestBody Usuario usuario){ //recebe os dados para salvar, injeta na classe usuario
     	
-    	
-    	Usuario user = usuarioRepository.save(usuario); //retorna entidade e salva no banco //ENDPOINT
-    	
-    	return new ResponseEntity<Usuario>(user, HttpStatus.CREATED); // retornando o que foi salvo e o status de execução
+    	if(usuario.getNome() == null ) {
+    		
+    		return new ResponseEntity<String>("É obrigatório informar Nome para salvar os dados", HttpStatus.OK);
+    	}
+    	else {
+    		Usuario user = usuarioRepository.save(usuario); //retorna entidade e salva no banco 
+    		return new ResponseEntity<Usuario>(user, HttpStatus.CREATED); // retornando o que foi salvo e o status de execução
+    	}
     }
     
     @DeleteMapping(value = "delete") //mapeamento de deletar
     @ResponseBody //descrição da resposta
-    public ResponseEntity<String> delete(@RequestParam Long iduser){ // recebe o id do usuario que vai ser deletado
+    public ResponseEntity<String> delete(@RequestParam (name = "iduser") Long iduser){ // recebe o id do usuario que vai ser deletado
     	
     	usuarioRepository.deleteById(iduser); //deletando no banco pelo id //ENDPOINT
     	
@@ -86,6 +90,7 @@ public class GreetingsController {
     	Usuario usuario = usuarioRepository.findById(iduser).get(); //buscando por id 
     	
     	return new ResponseEntity<Usuario>(usuario, HttpStatus.OK); //retorna pra tela esse usuario
+    
     }
     
     @PutMapping(value = "atualizar") //mapeamento de atualizar
@@ -112,6 +117,15 @@ public class GreetingsController {
 
     }
     
+    @PutMapping(value = "updateIdade")
+    @ResponseBody
+    public ResponseEntity<List<Usuario>>updateIdade(@RequestParam(name = "idade") int idade){
+    	
+    	List<Usuario> usuarios = usuarioRepository.updateIdade(idade);
+    	
+    	return new ResponseEntity<List<Usuario>>(usuarios, HttpStatus.OK);
+    	
+    }
     
     
 }

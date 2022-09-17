@@ -1,19 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="ISO-8859-1" />
-<title>Insert title here</title>
+<meta charset="utf-8" />
+<title>API-REST JP</title>
 <!-- Bootstrap CSS -->
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
 	rel="stylesheet"
 	integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
 	crossorigin="anonymous">
-
+	
+	<style type="text/css">
+	
+	html{
+		margin-left: 5%;
+		margin-right: 5%;
+		margin-top: 5%;
+	}
+	
+	</style>
 </head>
 <body>
 
-	<h3>Bem vindo ao Springboot REST API de Jo�o Pedro</h3>
+	<h3>Bem vindo ao Springboot API REST de João Pedro</h3>
 
 	<form action="" id="formCadastroUser">
 
@@ -30,10 +39,55 @@
 			<label for="idade" class="form-label">Idade:</label> <input
 				type="number" class="form-control" id="idade">
 		</div>
+
+		<button type="button" class="btn btn-primary" onclick="salvarUsuario()">Salvar</button>
+
+		<button type="button" class="btn btn-success" onclick="this.form.reset()">Novo</button>
+		<!-- Função novo e próprio botão limpa -->
+		<button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#ModalPesquisaUser">Pesquisar</button>
+		<button type="button" class="btn btn-danger" onclick="botaoDeletarTela()">Deletar</button>
+
+
 	</form>
+
+	<div class="modal fade" id="ModalPesquisaUser" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Pesquisa de Usuário</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div class="mb-3">
+							<label for="nameBusca" class="col-form-label">Informe o Nome:</label>
+							<input type="text" class="form-control" id="nameBusca">
+						</div>
+						<button type="button" class="btn btn-success" onclick="pesquisaUser()">Buscar</button>
+					</form>
+				<div style="height: 300px; overflow: scroll;">
+					<table class="table" id ="ResultPesq">
+						<thead >
+							<tr>
+								<th scope="col">ID</th>
+								<th scope="col">Nome</th>
+								<th scope="col">Editar</th>
+								<th scope="col">Apagar</th>
+							 </tr>
+						</thead>
+						<tbody>
 	
-	<button type="button" class="btn btn-primary" onclick="salvarUsuario()">Salvar</button>
-	
+						</tbody>
+					</table>
+				</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<script src="https://code.jquery.com/jquery-3.6.1.min.js"
 		integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ="
 		crossorigin="anonymous"></script>
@@ -46,21 +100,140 @@
 
 	<script type="text/javascript">
 	
-		function salvarUsuario(){ //chamando a fun��o no momento do click salvar
+	function botaoDeletarTela(){
+		
+		var id = $('#id').val();
+		if(id != null && id.trim() != ''){
+
+			deleteUser(id);
+		
+		document.getElementById('formCadastroUser').this.form.reset();
+	}
+}
+		
+	function pesquisaUser(){
 			
-			var id = $("#id").val(); //pegando o valor do campo de id
+			var nome = $('#nameBusca').val();
 			
-			var nome = $("#nome").val(); //pegando o valor do campo nome
+			if(nome != null && nome.trim() != ''){
+				
+				$.ajax({
+
+					method : "GET", //define protocolo de execução
+					url : "buscarPorNome", //mapea url que vai executar
+					data : "name= " + nome, //conteudo json
+					contentType : "application/json; charset=utf-8",
+					
+					success : function(response) { //se tudo certo
+						
+						$('#ResultPesq > tbody > tr').remove();
+					
+						for (var i = 0; i < response.length; i++){
+							$('#ResultPesq > tbody').
+							append('<tr id= "'+response[i].id+'" ><td>'+response[i].id+'</td><td>'+response[i].nome+
+							'</td><td><button type="button" onclick = "colocarEdition('+response[i].id+')"class="btn btn-primary">Editar</button></td>'+
+							'<td><button type="button" class="btn btn-danger" onclick="deleteUser('+response[i].id+')">Apagar</button></td></tr>'); //adiciona nova linha com o usuario
+						}
+					}
+
+				}).fail(function(xhr, status, errorThrown) { //se nao, msg de erro e status
+
+					alert("Erro ao buscar usuario por nome: " + xhr.responseText);
+				});
+				
+			}else{
+				alert("Informe um nome para busca");
+			}
+		}
+	
+	function deleteUser(id){
+		
+		if(confirm('Deseja realmente deletar?')){
+		
+		$.ajax({
+
+			method : "DELETE", //define protocolo de execução
+			url : "delete", //mapea url que vai executar
+			data : "iduser= " + id , //conteudo json
+			success : function(response) { //se tudo certo, emite 
+		
+				$('#' + id).remove();
+				
+				alert(response);
+			}
+
+		}).fail(function(xhr, status, errorThrown) { // se nao, msg de erro e status
+			  alert("Erro ao deletar usuario por id: " + xhr.responseText);
+		});
+		
+	}
+}
+		
+	function colocarEdition(id){
 			
-			var idade = $("#idade").val(); // pefando o valor do campo idade
+			$.ajax({
+
+				method : "GET", //define protocolo de execução
+				url : "buscaruserid", //mapea url que vai executar
+				data : "iduser= " + id, //conteudo json
+				contentType : "application/json; charset=utf-8",
+				success : function(response) { //se tudo certo, emite 
+
+					 $("#id").val(response.id); //pegando o valor do campo de id
+					 $("#nome").val(response.nome); //pegando o valor do campo nome
+					 $("#idade").val(response.idade); // pefando o valor do campo idade
+					 
+					 $('#ModalPesquisaUser').modal('hide');
+					
+				}
+
+			}).fail(function(xhr, status, errorThrown) { // se nao, msg de erro e status
+
+				alert("Erro ao buscar usuario por id: " + xhr.responseText);
+			});
 			
-			alert(nome);
 			
 		}
 	
-	</script>
+		function salvarUsuario() { //chamando a função no momento do click salvar
+
+			var id = $("#id").val(); //pegando o valor do campo de id
+			var nome = $("#nome").val(); //pegando o valor do campo nome
+			var idade = $("#idade").val(); // pefando o valor do campo idade
 	
+			if(nome != null && nome.trim() != ''){
+		
+			$.ajax({
+
+				method : "POST", //define protocolo de execução
+				url : "salvar", //mapea url que vai executar
+				data : JSON.stringify({
+					id : id,
+					nome : nome,
+					idade : idade
+				}), //conteudo json
+				contentType : "application/json; charset=utf-8",
+				success : function(response) { //se tudo certo, emite alerta 
+
+					$("#id").val(response.id); // pegando id que retorna do user salvo e get na tela
+
+					alert("Gravou com sucesso!");
+				}
+
+			}).fail(function(xhr, status, errorThrown) { // se nao, msg de erro e status
+
+				alert("Erro ao salvar usuario: " + xhr.responseText);
+
+			});
+			
+			}else{
+				alert("Informe um nome para salvar");
+			}
+		}
+		
+	</script>
 
 
-	</body>
+
+</body>
 </html>
