@@ -115,18 +115,7 @@ public class GreetingsController {
     	
     	return new ResponseEntity<List<Usuario>>(usuarios, HttpStatus.OK); //retorna pra tela o resultado
 
-    }
-    
-    @PutMapping(value = "updateIdade")
-    @ResponseBody
-    public ResponseEntity<List<Usuario>>updateIdade(@RequestParam(name = "idade") int idade){
-    	
-    	List<Usuario> usuarios = usuarioRepository.updateIdade(idade);
-    	
-    	return new ResponseEntity<List<Usuario>>(usuarios, HttpStatus.OK);
-    	
-    }
-    
+    } 
     
 }
 
